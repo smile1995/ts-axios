@@ -1,9 +1,15 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const cookieParser = require('cookie-parser')
+const multipart = require('connect-multiparty')
 const webpack = require('webpack')
 const webpackDevMiddleware = require('webpack-dev-middleware')
 const webpackHotMiddleware = require('webpack-hot-middleware')
 const WebpackConfig = require('./webpack.config')
+const path = require('path')
+const atob = require('atob')
+
+require('./server2')
 
 const app = express()// 开启一个 server
 const compiler = webpack(WebpackConfig)// webpack 编译 webpack 的配置文件
@@ -21,11 +27,20 @@ app.use(webpackDevMiddleware(compiler, {
 app.use(webpackHotMiddleware(compiler))
 
 // 静态资源目录
-app.use(express.static(__dirname))
+app.use(express.static(__dirname, {
+  setHeaders(res) {
+    res.cookie('XSRF-TOKEN-D', '1234abc')
+  }
+}))
 
 // 解析发送过来 requestBody 的数据
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(cookieParser())
+
+app.use(multipart({
+  uploadDir: path.resolve(__dirname, 'upload-file')
+}))
 
 const router = express.Router()
 
@@ -40,6 +55,10 @@ registerExtendRouter()
 registerInterceptorRouter()
 
 registerConfigRouter()
+
+registerCancelRouter()
+
+registerMoreRouter()
 
 app.use(router)
 
@@ -150,5 +169,57 @@ function registerInterceptorRouter() {
 function registerConfigRouter() {
   router.post('/config/post', function(req, res) {
     res.json(req.body)
+  })
+}
+
+function registerCancelRouter() {
+  router.get('/cancel/get', function(req, res) {
+    setTimeout(() => {
+      res.json('hello')
+    }, 1000)
+  })
+
+  router.post('/cancel/post', function(req, res) {
+    setTimeout(() => {
+      res.json(req.body)
+    }, 1000)
+  })
+}
+
+function registerMoreRouter() {
+  router.get('/more/get', function(req, res) {
+    res.json(req.cookies)
+  })
+
+  router.post('/more/upload', function(req, res) {
+    console.log(res.body, req.files)
+    res.end('upload success!')
+  })
+
+  router.post('/more/post', function(req, res) {
+    const auth = req.headers.authorization
+    const [type, credentials] = auth.split(' ')
+    console.log(atob(credentials))
+    // atob 方法在 NodeJS 中没有该方法，在 JavaScript 中是有该方法的
+    const [username, password] = atob(credentials).split(':')
+    if (type === 'Basic' && username === 'Yee' && password === '123456') {
+      res.json(req.body)
+    } else {
+      res.status(404)
+      res.end('UnAuthorization')
+    }
+  })
+
+  router.get('/more/304', function(req, res) {
+    res.status((304))
+    res.end()
+  })
+
+  router.get('/more/A', function(req, res) {
+    res.end('A')
+  })
+
+  router.get('/more/B', function(req, res) {
+    res.end('B')
   })
 }

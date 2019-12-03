@@ -12,12 +12,15 @@ function fromVal2Strat(val1: any, val2: any): any {
 }
 
 function deepMergeStrat(val1: any, val2: any): any {
-  if (isPlainObject(val2)) {// 判断 val2 是否是一个对象
-    return deepMerge(val1, val2)// 深拷贝
-  } else if (typeof val2 !== 'undefined') {// 判断 val2 是有值的，但不是一个对象
+  if (isPlainObject(val2)) {
+    // 判断 val2 是否是一个对象
+    return deepMerge(val1, val2) // 深拷贝
+  } else if (typeof val2 !== 'undefined') {
+    // 判断 val2 是有值的，但不是一个对象
     return val2
-  } else if (isPlainObject(val1)) {// 判断 val1 是否是一个对象
-    return deepMerge(val1)// 深拷贝
+  } else if (isPlainObject(val1)) {
+    // 判断 val1 是否是一个对象
+    return deepMerge(val1) // 深拷贝
   } else {
     return val1
   }
@@ -35,8 +38,10 @@ stratKeysDeepMerge.forEach(key => {
   strats[key] = deepMergeStrat
 })
 
-
-export default function mergeConfig(config1: AxiosRequestConfig, config2?: AxiosRequestConfig): AxiosRequestConfig {
+export default function mergeConfig(
+  config1: AxiosRequestConfig,
+  config2?: AxiosRequestConfig
+): AxiosRequestConfig {
   if (!config2) config2 = {}
 
   const config = Object.create(null)

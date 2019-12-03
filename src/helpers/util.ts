@@ -1,4 +1,4 @@
-const toString = Object.prototype.toString// 常见的判断类型的方法
+const toString = Object.prototype.toString // 常见的判断类型的方法
 
 // 判断是否是 Date 类型
 export function isDate(val: any): val is Date /* 类型保护 */ {
@@ -36,10 +36,13 @@ export function deepMerge(...objs: any[]): any {
   const result = Object.create(null)
   objs.forEach(obj => {
     if (obj) {
-      Object.keys(obj).forEach(key => {// 遍历对象
+      Object.keys(obj).forEach(key => {
+        // 遍历对象
         const val = obj[key]
-        if (isPlainObject(val)) {// 如果对象的值还是对象
-          if (isPlainObject(result[key])) {// 判断 result[key] 的值是否存在
+        if (isPlainObject(val)) {
+          // 如果对象的值还是对象
+          if (isPlainObject(result[key])) {
+            // 判断 result[key] 的值是否存在
             result[key] = deepMerge(result[key], val)
           } else {
             result[key] = deepMerge(val) // 递归
@@ -51,4 +54,13 @@ export function deepMerge(...objs: any[]): any {
     }
   })
   return result
+}
+
+// 判断是否是 FormData 类型
+export function isFormData(val: any): val is FormData {
+  return typeof val !== 'undefined' && val instanceof FormData
+}
+
+export function isURLSearchParams(val: any): val is URLSearchParams {
+  return typeof val !== 'undefined' && val instanceof URLSearchParams
 }
